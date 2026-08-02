@@ -43,6 +43,15 @@ const POST_LOGIN_REDIRECT = APP_ORIGINS[0] || '/';
 const app = express();
 if (process.env.TRUST_PROXY) app.set('trust proxy', 1);
 
+// The reverse proxy terminates TLS but may not forward X-Forwarded-Proto. In
+// production behind a trusted proxy, assume HTTPS so secure session cookies are set.
+if (isProd && process.env.TRUST_PROXY) {
+  app.use((req, _res, next) => {
+    if (!req.headers['x-forwarded-proto']) req.headers['x-forwarded-proto'] = 'https';
+    next();
+  });
+}
+
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -148,14 +157,24 @@ async function getAccessToken(req) {
 app.get('/api/auth/login', (req, res) => {
   const state = crypto.randomBytes(16).toString('hex');
   req.session.oauthState = state;
+  console.log('OAuth login: secure=%s xfProto=%s', req.secure, req.get('x-forwarded-proto'));
   res.redirect(buildAuthUrl(state));
 });
 
 app.get('/api/auth/callback', async (req, res) => {
   try {
     const { code, state, error } = req.query;
-    if (error) return res.redirect(`${POST_LOGIN_REDIRECT}?auth=error`);
+    if (error) {
+      console.error('OAuth callback: provider error:', error);
+      return res.redirect(`${POST_LOGIN_REDIRECT}?auth=error`);
+    }
     if (!code || !state || state !== req.session.oauthState) {
+      console.error('OAuth callback: state check failed', {
+        hasCode: !!code,
+        hasState: !!state,
+        hasSessionState: !!req.session.oauthState,
+        stateMatches: state === req.session.oauthState,
+      });
       return res.redirect(`${POST_LOGIN_REDIRECT}?auth=error`);
     }
     delete req.session.oauthState;

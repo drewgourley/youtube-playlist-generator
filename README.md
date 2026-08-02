@@ -123,7 +123,7 @@ SESSION_SECRET=...            # node -e "console.log(require('crypto').randomByt
 ### 3. Start under PM2
 
 ```bash
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 pm2 save                       # persist across reboots (run pm2 startup once)
 pm2 logs "YouTube Playlist Generator"
 ```
