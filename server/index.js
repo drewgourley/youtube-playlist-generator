@@ -157,7 +157,6 @@ async function getAccessToken(req) {
 app.get('/api/auth/login', (req, res) => {
   const state = crypto.randomBytes(16).toString('hex');
   req.session.oauthState = state;
-  console.log('OAuth login: secure=%s xfProto=%s', req.secure, req.get('x-forwarded-proto'));
   res.redirect(buildAuthUrl(state));
 });
 
