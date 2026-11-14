@@ -87,15 +87,15 @@ set `TRUST_PROXY=1` so secure cookies work.
 ## Deploy on a Raspberry Pi (PM2 + reverse proxy)
 
 This assumes a reverse proxy (e.g. the companion `reverse-proxy` app) terminates
-TLS for `https://playlists.drewgourley.com` and forwards to this app's local port
+TLS for `https://playlists.example.com` and forwards to this app's local port
 (`3173`), passing the `X-Forwarded-Proto` header.
 
 ### 1. Google Cloud OAuth client
 
 Add to the OAuth 2.0 **Web application** client:
 
-- Authorized JavaScript origin: `https://playlists.drewgourley.com`
-- Authorized redirect URI: `https://playlists.drewgourley.com/api/auth/callback`
+- Authorized JavaScript origin: `https://playlists.example.com`
+- Authorized redirect URI: `https://playlists.example.com/api/auth/callback`
 
 ### 2. Clone, configure, build
 
@@ -111,8 +111,8 @@ Production `.env` values (secrets filled in as usual):
 ```ini
 PORT=3173
 APP_ENV=production
-APP_ORIGIN=https://playlists.drewgourley.com
-OAUTH_REDIRECT_URI=https://playlists.drewgourley.com/api/auth/callback
+APP_ORIGIN=https://playlists.example.com
+OAUTH_REDIRECT_URI=https://playlists.example.com/api/auth/callback
 TRUST_PROXY=1
 YT_API_KEY=...
 GOOGLE_CLIENT_ID=...
@@ -130,7 +130,7 @@ pm2 logs "YouTube Playlist Generator"
 
 ### 4. Point the reverse proxy at it
 
-Add a service that maps `playlists.drewgourley.com` → `http://localhost:3173`
+Add a service that maps `playlists.example.com` → `http://localhost:3173`
 and provision its Let's Encrypt certificate.
 
 To deploy updates: `git pull && npm install && npm run build && pm2 restart
@@ -164,3 +164,13 @@ personal or small-group tool, staying in Testing mode is usually simplest.
 This product uses the YouTube API Services. By using it you agree to the
 [YouTube Terms of Service](https://www.youtube.com/t/terms) and the
 [Google Privacy Policy](https://policies.google.com/privacy).
+
+## Disclaimer
+
+This is an independent project. It is not affiliated with, endorsed by or sponsored by YouTube or Google, and YouTube is a trademark
+of Google LLC. You are responsible for your own Google Cloud project, API key, OAuth client and quota, and for following the
+[YouTube API Services Terms of Service](https://developers.google.com/youtube/terms/api-services-terms-of-service) when you run it.
+
+## License
+
+Released under the [MIT License](LICENSE).
